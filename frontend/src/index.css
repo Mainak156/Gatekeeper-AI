@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Digital Logic Design System - All colors MUST be HSL */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* Dark tech theme */
+    --background: 220 27% 8%;
+    --foreground: 180 100% 90%;
+
+    --card: 220 27% 10%;
+    --card-foreground: 180 100% 90%;
+
+    --popover: 220 27% 10%;
+    --popover-foreground: 180 100% 90%;
+
+    /* Electric blue primary */
+    --primary: 190 100% 50%;
+    --primary-foreground: 220 27% 8%;
+
+    /* Darker secondary */
+    --secondary: 220 27% 15%;
+    --secondary-foreground: 180 100% 90%;
+
+    --muted: 220 27% 12%;
+    --muted-foreground: 180 20% 60%;
+
+    /* Cyan accent */
+    --accent: 180 100% 50%;
+    --accent-foreground: 220 27% 8%;
+
+    /* Red for errors */
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 180 100% 90%;
+
+    --border: 220 27% 20%;
+    --input: 220 27% 15%;
+    --ring: 190 100% 50%;
+
+    /* Electric gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(190 100% 50%), hsl(180 100% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(220 27% 15%), hsl(220 27% 20%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 27% 8%) 0%, hsl(220 27% 12%) 50%, hsl(220 27% 8%) 100%);
+
+    /* Circuit effects */
+    --glow-primary: 0 0 20px hsl(190 100% 50% / 0.5);
+    --glow-accent: 0 0 20px hsl(180 100% 50% / 0.3);
+    --shadow-card: 0 8px 32px hsl(220 27% 4% / 0.8);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-glow: box-shadow 0.3s ease;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-mono;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Circuit board grid pattern */
+  .circuit-grid {
+    background-image: 
+      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Glowing effects */
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .glow-accent {
+    box-shadow: var(--glow-accent);
+  }
+
+  /* Truth table styling */
+  .truth-table {
+    @apply border border-border rounded-lg overflow-hidden bg-card;
+  }
+
+  .truth-table th {
+    @apply bg-secondary text-secondary-foreground font-semibold p-3 border-b border-border;
+  }
+
+  .truth-table td {
+    @apply p-3 text-center border-b border-border last:border-b-0;
+  }
+
+  .truth-table tr:nth-child(even) {
+    @apply bg-muted/30;
+  }
+
+  /* Logic gate animations */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px hsl(var(--primary) / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.6), 0 0 30px hsl(var(--primary) / 0.4);
+    }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
