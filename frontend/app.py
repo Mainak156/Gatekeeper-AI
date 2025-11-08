@@ -1,22 +1,33 @@
 import base64
 import os
 import sys
-import streamlit as st
 import numpy as np
+import streamlit as st
 
-sys.path.append(os.path.dirname(__file__))
+# ✅ Dynamically add both the current and parent directory to the module path
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(CURRENT_DIR)
+if CURRENT_DIR not in sys.path:
+    sys.path.append(CURRENT_DIR)
+if PARENT_DIR not in sys.path:
+    sys.path.append(PARENT_DIR)
 
-from logic_utils import (
-    predict_gate,
-    predict_full_adder,
-    predict_encoder,
-    predict_decoder,
-    predict_mux_16to1,
-    predict_demux_1to16,
-    reload_models
-)
+# ✅ Try importing logic_utils (works locally & on Streamlit Cloud)
+try:
+    from logic_utils import (
+        predict_gate,
+        predict_full_adder,
+        predict_encoder,
+        predict_decoder,
+        predict_mux_16to1,
+        predict_demux_1to16,
+        reload_models,
+    )
+except ImportError as e:
+    st.error("❌ Import failed: Could not find `logic_utils.py`. Make sure it exists in `frontend/`.")
+    st.stop()
 
-# 🔄 Reload models on app start
+# 🔄 Reload models when app starts
 reload_models()
 
 # ===========================
