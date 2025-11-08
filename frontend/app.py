@@ -1,49 +1,17 @@
-import os
-import sys
-import base64
-import numpy as np
 import streamlit as st
+import numpy as np
+import base64
+from logic_utils import (
+    predict_gate,
+    predict_full_adder,
+    predict_encoder,
+    predict_decoder,
+    predict_mux_16to1,
+    predict_demux_1to16,
+    reload_models
+)
 
-# ==============================================
-# 🔧 Universal Import Fix for Streamlit Cloud
-# ==============================================
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-PARENT_DIR = os.path.dirname(CURRENT_DIR)
-
-# Add both /frontend and its parent directory to sys.path
-if CURRENT_DIR not in sys.path:
-    sys.path.append(CURRENT_DIR)
-if PARENT_DIR not in sys.path:
-    sys.path.append(PARENT_DIR)
-
-# Try direct import first (since Streamlit runs inside /frontend/)
-try:
-    from logic_utils import (
-        predict_gate,
-        predict_full_adder,
-        predict_encoder,
-        predict_decoder,
-        predict_mux_16to1,
-        predict_demux_1to16,
-        reload_models,
-    )
-except ModuleNotFoundError as e:
-    # Fallback for local runs (from repo root)
-    try:
-        from frontend.logic_utils import (
-            predict_gate,
-            predict_full_adder,
-            predict_encoder,
-            predict_decoder,
-            predict_mux_16to1,
-            predict_demux_1to16,
-            reload_models,
-        )
-    except Exception as inner_e:
-        st.error(f"❌ Import failed: {inner_e}")
-        st.stop()
-
-# ✅ Reload models on start
+# 🔄 Reload models on app start
 reload_models()
 
 # ===========================
@@ -245,4 +213,4 @@ else:
                 st.error(f"❌ Error: {e}")
 
 st.markdown("---")
-st.caption("Developed by Jiya Bali, Shivansh Singh, Mainak Sen & Yukta Bhardwaj")
+st.caption("🧠 Powered by Multi-Layer Perceptron Models | Developed by Mainak Sen")

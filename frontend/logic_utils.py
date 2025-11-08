@@ -2,98 +2,113 @@ import os
 import joblib
 import numpy as np
 
+# ======================================================
+# 1️⃣ Load All Models
+# ======================================================
 def load_models():
     BASE_DIR = os.path.dirname(__file__)
     MODEL_DIR = os.path.join(BASE_DIR, "models")
 
-    def safe_load(name):
-        path = os.path.join(MODEL_DIR, name)
-        if os.path.exists(path):
-            return joblib.load(path)
-        else:
-            print(f"⚠️ Model missing: {path}")
-            return None  # Return None if model not found
-
     models = {
-        "AND": safe_load("and_gate_slp.pkl"),
-        "OR": safe_load("or_gate_slp.pkl"),
-        "NOT": safe_load("not_gate_slp.pkl"),
-        "NAND": safe_load("nand_gate_slp.pkl"),
-        "NOR": safe_load("nor_gate_slp.pkl"),
-        "XOR": safe_load("xor_gate_mlp.pkl"),
-        "XNOR": safe_load("xnor_gate_mlp.pkl"),
-        "FULL_ADDER_SUM": safe_load("full_adder_sum_mlp.pkl"),
-        "FULL_ADDER_CARRY": safe_load("full_adder_carry_mlp.pkl"),
-        "MUX_16to1": safe_load("16to1_MUX_mlp.pkl"),
-        "DEMUX_1to16": safe_load("1to16_DEMUX_mlp.pkl"),
+        "AND": joblib.load(os.path.join(MODEL_DIR, "and_gate_slp.pkl")),
+        "OR": joblib.load(os.path.join(MODEL_DIR, "or_gate_slp.pkl")),
+        "NOT": joblib.load(os.path.join(MODEL_DIR, "not_gate_slp.pkl")),
+        "NAND": joblib.load(os.path.join(MODEL_DIR, "nand_gate_slp.pkl")),
+        "NOR": joblib.load(os.path.join(MODEL_DIR, "nor_gate_slp.pkl")),
+        "XOR": joblib.load(os.path.join(MODEL_DIR, "xor_gate_mlp.pkl")),
+        "XNOR": joblib.load(os.path.join(MODEL_DIR, "xnor_gate_mlp.pkl")),
+        "FULL_ADDER_SUM": joblib.load(os.path.join(MODEL_DIR, "full_adder_sum_mlp.pkl")),
+        "FULL_ADDER_CARRY": joblib.load(os.path.join(MODEL_DIR, "full_adder_carry_mlp.pkl")),
+        "MUX_16to1": joblib.load(os.path.join(MODEL_DIR, "16to1_MUX_mlp.pkl")),
+        "DEMUX_1to16": joblib.load(os.path.join(MODEL_DIR, "1to16_DEMUX_mlp.pkl")),
     }
 
-    # Load Encoder (8→3)
+    # Load Encoder sub-models (8→3)
     for bit in ["Y2", "Y1", "Y0"]:
-        models[f"ENCODER_8to3_{bit}"] = safe_load(f"8to3_Encoder_{bit}_mlp.pkl")
+        path = os.path.join(MODEL_DIR, f"8to3_Encoder_{bit}_mlp.pkl")
+        if os.path.exists(path):
+            models[f"ENCODER_8to3_{bit}"] = joblib.load(path)
 
-    # Load Decoder (3→8)
+    # Load Decoder sub-models (3→8)
     for i in range(8):
-        models[f"DECODER_3to8_D{i}"] = safe_load(f"3to8_Decoder_D{i}_mlp.pkl")
+        path = os.path.join(MODEL_DIR, f"3to8_Decoder_D{i}_mlp.pkl")
+        if os.path.exists(path):
+            models[f"DECODER_3to8_D{i}"] = joblib.load(path)
 
     return models
 
 
-# Global model dictionary
 models = load_models()
 
 
+def reload_models():
+    global models
+    models = load_models()
+    print("♻️ Models reloaded successfully.")
+
+
+# ======================================================
+# 2️⃣ Helper Function
+# ======================================================
 def _prepare_input(inputs):
+    """Ensure correct float 2D array input shape."""
     return np.array(inputs, dtype=float).reshape(1, -1)
 
 
+# ======================================================
+# 3️⃣ Gate and Circuit Predictors
+# ======================================================
 def predict_gate(gate_name, inputs):
-    model = models.get(gate_name)
-    if model is None:
-        raise FileNotFoundError(f"Model for {gate_name} not found on server.")
-    return int(model.predict(_prepare_input(inputs))[0])
+    model = models[gate_name]
+    x = _prepare_input(inputs)
+    return int(model.predict(x)[0])
 
 
 def predict_full_adder(inputs):
-    s_model = models.get("FULL_ADDER_SUM")
-    c_model = models.get("FULL_ADDER_CARRY")
-    if s_model is None or c_model is None:
-        raise FileNotFoundError("Full Adder models missing.")
     x = _prepare_input(inputs)
-    return int(s_model.predict(x)[0]), int(c_model.predict(x)[0])
+    s = models["FULL_ADDER_SUM"]
+    c = models["FULL_ADDER_CARRY"]
+    return int(s.predict(x)[0]), int(c.predict(x)[0])
 
 
 def predict_encoder(inputs):
     x = _prepare_input(inputs)
-    y2, y1, y0 = [
-        models.get(f"ENCODER_8to3_{bit}") for bit in ["Y2", "Y1", "Y0"]
-    ]
-    if not all([y2, y1, y0]):
-        raise FileNotFoundError("Encoder models missing.")
-    return np.array([int(y2.predict(x)[0]), int(y1.predict(x)[0]), int(y0.predict(x)[0])])
+    y2 = models["ENCODER_8to3_Y2"].predict(x)[0]
+    y1 = models["ENCODER_8to3_Y1"].predict(x)[0]
+    y0 = models["ENCODER_8to3_Y0"].predict(x)[0]
+    return np.array([int(y2), int(y1), int(y0)])
 
 
 def predict_decoder(inputs):
     x = _prepare_input(inputs)
     outputs = []
     for i in range(8):
-        model = models.get(f"DECODER_3to8_D{i}")
-        if model:
-            outputs.append(int(model.predict(x)[0]))
-        else:
-            outputs.append(0)
+        model_key = f"DECODER_3to8_D{i}"
+        model = models.get(model_key)
+        y = model.predict(x)[0]
+        outputs.append(int(y))
     return np.array(outputs)
 
 
+# ======================================================
+# ✅ Fixed: 16→1 Multiplexer
+# ======================================================
 def predict_mux_16to1(inputs):
-    model = models.get("MUX_16to1")
-    if model is None:
-        raise FileNotFoundError("MUX model missing.")
-    return int(model.predict(_prepare_input(inputs))[0])
+    """
+    inputs: [D0–D15, S0–S3]
+    Combines data inputs and select lines properly.
+    """
+    model = models["MUX_16to1"]
+    x = _prepare_input(inputs)
+    if x.shape[1] != 20:
+        raise ValueError(f"Expected 20 features (16 data + 4 select), got {x.shape[1]}")
+    return int(model.predict(x)[0])
 
 
+# ======================================================
+# 1→16 DeMultiplexer
+# ======================================================
 def predict_demux_1to16(inputs):
-    model = models.get("DEMUX_1to16")
-    if model is None:
-        raise FileNotFoundError("DEMUX model missing.")
-    return (model.predict(_prepare_input(inputs)) > 0.5).astype(int)[0]
+    model = models["DEMUX_1to16"]
+    x = _prepare_input(inputs)
+    return (model.predict(x) > 0.5).astype(int)[0]
