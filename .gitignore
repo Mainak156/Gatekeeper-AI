@@ -1,0 +1,29 @@
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# === Models ===
+frontend/models/*.pkl
+
+# === Environment / virtual envs ===
+.venv/
+env/
+venv/
+*.env
+
+# === Jupyter Checkpoints ===
+*.ipynb_checkpoints
+
+# === OS junk ===
+.DS_Store
+Thumbs.db
+
+# === IDE / Editor files ===
+.vscode/
+.idea/
+
+# === Streamlit cache ===
+.streamlit/
