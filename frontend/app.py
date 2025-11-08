@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import base64
-from logic_utils import (
+from .logic_utils import (
     predict_gate,
     predict_full_adder,
     predict_encoder,
