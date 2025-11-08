@@ -1,31 +1,51 @@
 import os
 import sys
+import base64
 import numpy as np
 import streamlit as st
-import base64
 
-# ✅ Dynamically set path so logic_utils can always be found
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-if CURRENT_DIR not in sys.path:
-    sys.path.append(CURRENT_DIR)
+# ==============================================
+# 🔧 Absolute Import Fix (Works on Streamlit Cloud)
+# ==============================================
+# Detect repo root even when Streamlit runs from /mount/src/
+REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+if not REPO_ROOT.endswith("frontend"):
+    REPO_ROOT = os.path.join(REPO_ROOT, "frontend")
 
-# ✅ Explicitly check for logic_utils.py inside frontend
-logic_utils_path = os.path.join(CURRENT_DIR, "logic_utils.py")
-if not os.path.exists(logic_utils_path):
-    st.error("❌ logic_utils.py not found! Expected at: " + logic_utils_path)
-    st.stop()
+# Add both frontend/ and its parent (repo root) to Python path
+sys.path.append(REPO_ROOT)
+sys.path.append(os.path.dirname(REPO_ROOT))
 
-from logic_utils import (
-    predict_gate,
-    predict_full_adder,
-    predict_encoder,
-    predict_decoder,
-    predict_mux_16to1,
-    predict_demux_1to16,
-    reload_models,
-)
+# Debug print (optional)
+st.write(f"🧩 Import path set to: {REPO_ROOT}")
 
-# 🔄 Reload models when app starts
+# Now safely import logic_utils
+try:
+    from frontend.logic_utils import (
+        predict_gate,
+        predict_full_adder,
+        predict_encoder,
+        predict_decoder,
+        predict_mux_16to1,
+        predict_demux_1to16,
+        reload_models,
+    )
+except ModuleNotFoundError:
+    try:
+        from logic_utils import (
+            predict_gate,
+            predict_full_adder,
+            predict_encoder,
+            predict_decoder,
+            predict_mux_16to1,
+            predict_demux_1to16,
+            reload_models,
+        )
+    except Exception as e:
+        st.error(f"❌ Critical import error: {e}")
+        st.stop()
+
+# ✅ Reload models on start
 reload_models()
 
 # ===========================
