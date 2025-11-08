@@ -1,7 +1,11 @@
+import os
+import sys
 import streamlit as st
 import numpy as np
-import base64
-from .logic_utils import (
+
+sys.path.append(os.path.dirname(__file__))
+
+from logic_utils import (
     predict_gate,
     predict_full_adder,
     predict_encoder,
