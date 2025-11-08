@@ -5,23 +5,20 @@ import numpy as np
 import streamlit as st
 
 # ==============================================
-# 🔧 Absolute Import Fix (Works on Streamlit Cloud)
+# 🔧 Universal Import Fix for Streamlit Cloud
 # ==============================================
-# Detect repo root even when Streamlit runs from /mount/src/
-REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-if not REPO_ROOT.endswith("frontend"):
-    REPO_ROOT = os.path.join(REPO_ROOT, "frontend")
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(CURRENT_DIR)
 
-# Add both frontend/ and its parent (repo root) to Python path
-sys.path.append(REPO_ROOT)
-sys.path.append(os.path.dirname(REPO_ROOT))
+# Add both /frontend and its parent directory to sys.path
+if CURRENT_DIR not in sys.path:
+    sys.path.append(CURRENT_DIR)
+if PARENT_DIR not in sys.path:
+    sys.path.append(PARENT_DIR)
 
-# Debug print (optional)
-st.write(f"🧩 Import path set to: {REPO_ROOT}")
-
-# Now safely import logic_utils
+# Try direct import first (since Streamlit runs inside /frontend/)
 try:
-    from frontend.logic_utils import (
+    from logic_utils import (
         predict_gate,
         predict_full_adder,
         predict_encoder,
@@ -30,9 +27,10 @@ try:
         predict_demux_1to16,
         reload_models,
     )
-except ModuleNotFoundError:
+except ModuleNotFoundError as e:
+    # Fallback for local runs (from repo root)
     try:
-        from logic_utils import (
+        from frontend.logic_utils import (
             predict_gate,
             predict_full_adder,
             predict_encoder,
@@ -41,8 +39,8 @@ except ModuleNotFoundError:
             predict_demux_1to16,
             reload_models,
         )
-    except Exception as e:
-        st.error(f"❌ Critical import error: {e}")
+    except Exception as inner_e:
+        st.error(f"❌ Import failed: {inner_e}")
         st.stop()
 
 # ✅ Reload models on start
