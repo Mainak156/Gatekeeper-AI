@@ -69,6 +69,21 @@ def add_bg_from_local(image_file="assets/bgimg.png"):
                 color: white !important;
             }}
 
+            /* === Inputs, Dropdowns, SelectBoxes === */
+            input, select, textarea {{
+                background-color: rgba(255, 255, 255, 0.1) !important;
+                color: #ffffff !important;
+                border: 1px solid rgba(255, 255, 255, 0.4) !important;
+                border-radius: 6px !important;
+            }}
+            input::placeholder, textarea::placeholder {{
+                color: #dcdcdc !important;
+            }}
+            option {{
+                color: #000000 !important;  /* Black text in dropdown list */
+                background-color: #ffffff !important;
+            }}
+
             /* === Buttons === */
             .stButton>button {{
                 background: linear-gradient(90deg, #00c6ff, #0072ff);
@@ -82,6 +97,19 @@ def add_bg_from_local(image_file="assets/bgimg.png"):
             .stButton>button:hover {{
                 transform: scale(1.05);
                 box-shadow: 0 0 15px #00c6ff;
+            }}
+
+            /* === Responsive fix for small devices === */
+            @media (max-width: 600px) {{
+                .block-container {{
+                    padding: 1rem;
+                }}
+                h1 {{
+                    font-size: 1.6rem !important;
+                }}
+                h2, h3 {{
+                    font-size: 1.1rem !important;
+                }}
             }}
             </style>
             """,
@@ -221,4 +249,4 @@ else:
                 st.error(f"❌ Error: {e}")
 
 st.markdown("---")
-st.caption("🧠 Powered by Multi-Layer Perceptron Models | Developed by Mainak Sen")
+st.caption("🧠 Developed by Jiya Bali, Shivansh Singh, Mainak Sen & Yukta Bhardwaj")
