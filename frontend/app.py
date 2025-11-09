@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import base64
+import os
 from logic_utils import (
     predict_gate,
     predict_full_adder,
@@ -24,16 +25,22 @@ st.set_page_config(
 )
 
 # ===========================
-# Add Background Image (from assets/)
+# Add Background Image (absolute path fix)
 # ===========================
-def add_bg_from_local(image_path="assets/bgimg.png"):
-    """Add a background image (PNG/JPG) to the Streamlit app."""
+def add_bg_from_local(image_file="assets/bgimg.png"):
+    """Add a background image to Streamlit app that works both locally and on Streamlit Cloud."""
     try:
-        with open(image_path, "rb") as img:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        full_path = os.path.join(current_dir, image_file)
+
+        if not os.path.exists(full_path):
+            st.warning(f"⚠️ Background image not found: {full_path}")
+            return
+
+        with open(full_path, "rb") as img:
             encoded = base64.b64encode(img.read()).decode()
 
-        # Detect correct MIME type automatically
-        mime_type = "image/png" if image_path.endswith(".png") else "image/jpeg"
+        mime_type = "image/png" if full_path.endswith(".png") else "image/jpeg"
 
         st.markdown(
             f"""
@@ -43,7 +50,6 @@ def add_bg_from_local(image_path="assets/bgimg.png"):
                 background-image: url("data:{mime_type};base64,{encoded}");
                 background-size: cover;
                 background-position: center;
-                background-repeat: no-repeat;
                 background-attachment: fixed;
             }}
 
@@ -81,8 +87,11 @@ def add_bg_from_local(image_path="assets/bgimg.png"):
             """,
             unsafe_allow_html=True
         )
-    except FileNotFoundError:
-        st.warning("⚠️ Background image not found in assets/ folder.")
+
+        print(f"✅ Background image loaded from: {full_path}")
+
+    except Exception as e:
+        st.warning(f"⚠️ Could not load background: {e}")
 
 
 # 🖼️ Load background image
@@ -93,7 +102,6 @@ add_bg_from_local("assets/bgimg.png")
 # ===========================
 st.title("🤖 GateKeeper AI")
 st.subheader("An Interactive Logic Circuit Simulator using MLP & SLP Models")
-
 st.markdown("---")
 
 # ===========================
